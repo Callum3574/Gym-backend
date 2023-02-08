@@ -1,32 +1,43 @@
 const express = require("express");
 const app = express();
 const client = require("./database.js");
-
 const port = 4000 || process.env.PORT;
+app.use(express.json());
+const cors = require("cors");
+app.use(cors(["http://localhost:3000"]));
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+app.post("/input_exercise", async (req, res) => {
+  try {
+    const data = await req.body;
+    const query = {
+      text: "INSERT INTO exercises (workout_id, duration, calories, steps, date, distance) VALUES ($1, $2, $3, $4, $5, $6)",
+      values: [
+        data.exercise_id,
+        data.duration,
+        data.calories,
+        data.steps,
+        data.date,
+        data.distance,
+      ],
+    };
+    client.query(query);
+    console.log(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "server error!" });
+  }
 });
 
-app.post("/input_exercise", (req, res) => {
-  const text = "INSERT INTO table_name VALUES ($1, $2, $3, $4, $5)";
-  const values = [
-    req.body.type,
-    req.body.distance,
-    req.body.steps,
-    req.body.calories,
-    req.body.time,
-  ];
-  console.log(values);
-
-  client.query(text, values, (err, result) => {
-    if (err) {
-      console.log(err);
-    }
-    console.log(result.rows);
-  });
-
-  console.log(res.message);
+app.get("/all_walk_data", async (req, res) => {
+  try {
+    const data = await client.query(
+      "SELECT distance, date, steps, calories, duration, type FROM exercises JOIN workouts ON workouts.id = exercises.workout_id ORDER BY workouts.id DESC"
+    );
+    res.status(200).json(data.rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "server error!" });
+  }
 });
 
 app.listen(port, () => {
