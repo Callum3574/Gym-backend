@@ -21,9 +21,7 @@ app.post("/input_exercise", async (req, res) => {
       ],
     };
     await client.query(query);
-    console.log(data);
   } catch (error) {
-    console.log(error);
     res.status(500).send({ message: "server error!" });
   }
 });
@@ -33,7 +31,6 @@ app.get("/all_walk_data", async (req, res) => {
     const data = await client.query(
       "SELECT exercises.id, distance, date, steps, calories, duration, type, rating FROM exercises JOIN workouts ON workouts.id = exercises.workout_id JOIN ratings ON ratings.exercise_id = exercises.id ORDER BY exercises.id DESC"
     );
-    console.log(data);
     res.status(200).json(data.rows);
   } catch (error) {
     console.log(error);
@@ -44,8 +41,9 @@ app.get("/all_walk_data", async (req, res) => {
 app.patch("/update_rating", async (req, res) => {
   try {
     const data = await req.body;
+    console.log("hey", data);
     const query = {
-      text: "UPDATE ratings SET rating = $1 WHERE id = $2",
+      text: "UPDATE ratings SET rating = $1 WHERE exercise_id = $2",
       values: [data.rating, data.id],
     };
     await client.query(query);
