@@ -29,7 +29,7 @@ app.post("/input_exercise", async (req, res) => {
 app.get("/all_walk_data", async (req, res) => {
   try {
     const data = await client.query(
-      "SELECT exercises.id, distance, date, steps, calories, duration, type, rating FROM exercises JOIN workouts ON workouts.id = exercises.workout_id JOIN ratings ON ratings.exercise_id = exercises.id ORDER BY exercises.id DESC"
+      "SELECT exercises.id, distance, date, steps, calories, duration, type, location, rating FROM exercises JOIN workouts ON workouts.id = exercises.workout_id JOIN ratings ON ratings.exercise_id = exercises.id ORDER BY exercises.id DESC"
     );
     res.status(200).json(data.rows);
   } catch (error) {
