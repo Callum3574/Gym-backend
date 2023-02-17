@@ -96,20 +96,34 @@ app.post("/create_user", async (req, res) => {
   }
 });
 
+app.get("/get_user/:user_id", async (req, res) => {
+  const data = req.params.user_id;
+  console.log(data);
+  try {
+    const query = {
+      text: "SELECT firstname FROM users WHERE user_id = $1",
+      values: [data],
+    };
+    const name = await client.query(query);
+    console.log(name.rows);
+    res.status(200).send({ message: "user found!", name: name.rows });
+  } catch (e) {
+    console.error(e);
+  }
+});
+
 app.post("/verify_token", async (req, res) => {
   try {
     const { idToken } = req.body;
-    console.log(idToken);
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const uid = decodedToken.uid;
     // Check if user has admin role
     const user = await admin.auth().getUser(uid);
     const customClaims = user.customClaims;
-    console.log(customClaims.role);
     if (customClaims && customClaims.role === "admin") {
-      res.status(200).send({ message: "Valid token and user is admin" });
+      res.status(200).send({ auth: true });
     } else {
-      res.status(403).send({ message: "User is not authorized" });
+      res.status(403).send({ auth: false });
     }
   } catch (error) {
     console.error(error);
